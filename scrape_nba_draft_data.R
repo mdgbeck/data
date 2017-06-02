@@ -1,6 +1,7 @@
 library(rvest)
 library(tidyverse)
 
+# function that pulls a years draft and the same seasons stats for the draftees
 get_draft_data <- function(year){
 
   draft_url <- paste0("http://www.basketball-reference.com/draft/NBA_", 
