@@ -48,6 +48,6 @@ get_draft_data <- function(year){
   
 }
 
-# pull data 1989 - 2016
+# pull and combine data 1989 - 2016
 nba <- lapply(1989:2016, get_draft_data) %>% 
   bind_rows()
