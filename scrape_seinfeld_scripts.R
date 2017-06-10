@@ -38,8 +38,12 @@ pull_script <- function(page_url){
   # get lines
   script_edit <- str_replace_all(script, "\t|\\(.*?\\)|\\[.*?\\]|NOTE:", "")
   
-  lines <- unlist(str_extract_all(script_edit, 
-                                  "(?<=\n[:upper:]{1,20}(\\s{1,20})?:).*"))
+  # regex patterns for pulling speakers and lines
+  line_regex <- "(?<=\n[A-Z]{1,20}(\\.)?(\\s{1,20})?([A-Z]{1,20})?:).*"
+  
+  speaker_regex <- "(?<=\n)[A-Z]+(\\.)?(\\s)?([A-Z]+)?(?=:)"
+  
+  lines <- unlist(str_extract_all(script_edit, line_regex))
   
   lines <- str_replace_all(lines, "\\u0092", "'")
   
@@ -53,7 +57,7 @@ pull_script <- function(page_url){
       # remove episode information
       slice(-1) %>% 
       mutate(text = str_replace_all(text, "\t|\\(.*?\\)|\\[.?\\]|NOTE:", ""),
-             speaker = str_extract_all(text, "(?<=\n)[:upper:]+(\\s)?(?=:)")) %>% 
+             speaker = str_extract_all(text, speaker_regex)) %>% 
       unnest(speaker)
   
   } else {
@@ -65,7 +69,7 @@ pull_script <- function(page_url){
       # remove episode information
       slice(-1) %>% 
       mutate(text = str_replace_all(text, "\t|\\(.*?\\)|\\[.?\\]|NOTE:", ""),
-             speaker = str_extract_all(text, "(?<=\n)[:upper:]+(\\s)?(?=:)")) %>% 
+             speaker = str_extract_all(text, speaker_regex)) %>% 
       unnest(speaker)
   
   } 
@@ -90,8 +94,7 @@ pull_script <- function(page_url){
       writer = writer,
       scene_num = NA,
       scene = NA,
-      speaker = unlist(str_extract_all(script_edit, 
-                                       "(?<=\n)[:upper:]+(\\s)?(?=:)")),
+      speaker = unlist(str_extract_all(script_edit, speaker_regex)),
       line = lines
     )
     
@@ -100,9 +103,9 @@ pull_script <- function(page_url){
 }
 
 # run for all episodes
-seinfeld <- lapply(links$full_url[1:176], pull_script) %>% 
-  bind_rows() %>% 
-  
+seinfeld <- lapply(links$full_url, pull_script) %>% 
+  bind_rows() 
+
 seinfeld <- seinfeld %>% 
   mutate(episode = as.numeric(episode))
 
